@@ -4,18 +4,18 @@ import { Bundle, Pool, Token } from './../types/schema'
 import { BigDecimal, BigInt } from '@graphprotocol/graph-ts'
 import { exponentToBigDecimal, safeDiv } from '../utils/index'
 
-const WBNB_ADDRESS = '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c'
+const WPLQ_ADDRESS = '0x5EBCdf1De1781e8B5D41c016B0574aD53E2F6E1A'
 const USDC_WBNB_03_POOL = '0x6bcb0Ba386E9de0C29006e46B2f01f047cA1806E'
 
 // token where amounts should contribute to tracked volume and liquidity
 // usually tokens that many tokens are paired with s
 export let WHITELIST_TOKENS: string[] = [
-  WBNB_ADDRESS,
+  WPLQ_ADDRESS,
 ]
 
 let STABLE_COINS: string[] = [
-  '0x55d398326f99059ff775485246999027b3197955', // USDT
-  '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d', // USDC
+  '0x765277EebeCA2e31912C9946eAe1021199B39C61', // USDT
+  '0x639A647fbe20b6c8ac19E48E2de44ea792c62c5C', // USDC
 ]
 
 let MINIMUM_ETH_LOCKED = BigDecimal.fromString('0')
@@ -47,8 +47,8 @@ export function getEthPriceInUSD(): BigDecimal {
  * Search through graph to find derived Eth per token.
  * @todo update to be derived ETH (add stablecoin estimates)
  **/
-export function findBnbPerToken(token: Token): BigDecimal {
-  if (token.id == WBNB_ADDRESS) {
+export function findPlqPerToken(token: Token): BigDecimal {
+  if (token.id == WPLQ_ADDRESS) {
     return ONE_BD
   }
   let whiteList = token.whitelistPools
@@ -74,7 +74,7 @@ export function findBnbPerToken(token: Token): BigDecimal {
       if (!pool) {
         return ZERO_BD
       }
-    
+
       if (pool.liquidity.gt(ZERO_BI)) {
         if (pool.token0 == token.id) {
           // whitelist token is token1
@@ -82,7 +82,7 @@ export function findBnbPerToken(token: Token): BigDecimal {
           if (!token1) {
             return ZERO_BD
           }
-        
+
           // get the derived ETH in pool
           let ethLocked = pool.totalValueLockedToken1.times(token1.derivedETH)
           if (ethLocked.gt(largestLiquidityETH) && ethLocked.gt(MINIMUM_ETH_LOCKED)) {
@@ -96,7 +96,7 @@ export function findBnbPerToken(token: Token): BigDecimal {
           if (!token0) {
             return ZERO_BD
           }
-        
+
           // get the derived ETH in pool
           let ethLocked = pool.totalValueLockedToken0.times(token0.derivedETH)
           if (ethLocked.gt(largestLiquidityETH) && ethLocked.gt(MINIMUM_ETH_LOCKED)) {

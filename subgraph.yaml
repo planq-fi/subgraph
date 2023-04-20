@@ -38,7 +38,7 @@ dataSources:
 templates:
   - kind: ethereum/contract
     name: Pool
-    network: bsc
+    network: planq
     source:
       abi: Pool
     mapping:

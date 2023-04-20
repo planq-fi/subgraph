@@ -11,7 +11,7 @@ import {
 } from '../types/templates/Pool/Pool'
 import { convertTokenToDecimal, loadTransaction, safeDiv } from '../utils'
 import { FACTORY_ADDRESS, ONE_BI, ZERO_BD, ZERO_BI } from '../utils/constants'
-import { findBnbPerToken, getEthPriceInUSD, getTrackedAmountUSD, sqrtPriceX96ToTokenPrices } from '../utils/pricing'
+import { findPlqPerToken, getEthPriceInUSD, getTrackedAmountUSD, sqrtPriceX96ToTokenPrices } from '../utils/pricing'
 import {
   updatePoolDayData,
   updatePoolHourData,
@@ -25,12 +25,12 @@ import { createTick, feeTierToTickSpacing } from '../utils/tick'
 export function handleInitialize(event: Initialize): void {
   // update pool sqrt price and tick
   let pool = Pool.load(event.address.toHexString())
-  if (!pool) return 
+  if (!pool) return
 
   pool.sqrtPrice = event.params.sqrtPriceX96
   pool.tick = BigInt.fromI32(event.params.tick)
   pool.save()
-  
+
   // update token prices
   let token0 = Token.load(pool.token0)
   let token1 = Token.load(pool.token1)
@@ -38,7 +38,7 @@ export function handleInitialize(event: Initialize): void {
 
   // update ETH price now that prices could have changed
   let bundle = Bundle.load('1')
-  if (!token0 || !token1 || !bundle) return 
+  if (!token0 || !token1 || !bundle) return
 
   bundle.ethPriceUSD = getEthPriceInUSD()
   bundle.save()
@@ -47,8 +47,8 @@ export function handleInitialize(event: Initialize): void {
   updatePoolHourData(event)
 
   // update token prices
-  token0.derivedETH = findBnbPerToken(token0 as Token)
-  token1.derivedETH = findBnbPerToken(token1 as Token)
+  token0.derivedETH = findPlqPerToken(token0 as Token)
+  token1.derivedETH = findPlqPerToken(token1 as Token)
   token0.save()
   token1.save()
 }
@@ -76,7 +76,7 @@ export function handleMint(event: MintEvent): void {
 
   let token0 = Token.load(pool.token0)
   let token1 = Token.load(pool.token1)
-  if (!token0 || !token1) return 
+  if (!token0 || !token1) return
 
   let amount0 = convertTokenToDecimal(event.params.amount0, token0.decimals)
   let amount1 = convertTokenToDecimal(event.params.amount1, token1.decimals)
@@ -199,7 +199,7 @@ export function handleBurn(event: BurnEvent): void {
   let token0 = Token.load(pool.token0)
   let token1 = Token.load(pool.token1)
 
-  if (!token0 || !token1) return 
+  if (!token0 || !token1) return
 
   let amount0 = convertTokenToDecimal(event.params.amount0, token0.decimals)
   let amount1 = convertTokenToDecimal(event.params.amount1, token1.decimals)
@@ -270,7 +270,7 @@ export function handleBurn(event: BurnEvent): void {
   let upperTickId = poolAddress + '#' + BigInt.fromI32(event.params.tickUpper).toString()
   let lowerTick = Tick.load(lowerTickId)
   let upperTick = Tick.load(upperTickId)
-  if (!lowerTick || !upperTick) return 
+  if (!lowerTick || !upperTick) return
 
   let amount = event.params.amount
   lowerTick.liquidityGross = lowerTick.liquidityGross.minus(amount)
@@ -313,7 +313,7 @@ export function handleSwap(event: SwapEvent): void {
   let bundle = Bundle.load('1')
   let factory = Factory.load(FACTORY_ADDRESS)
   let pool = Pool.load(event.address.toHexString())
-  if (!factory || !pool || !bundle) return 
+  if (!factory || !pool || !bundle) return
 
   // hot fix for bad pricing
   if (pool.id == '0x9663f2ca0454accad3e094448ea6f77443880454') {
@@ -322,7 +322,7 @@ export function handleSwap(event: SwapEvent): void {
 
   let token0 = Token.load(pool.token0)
   let token1 = Token.load(pool.token1)
-  if (!token0 || !token1) return 
+  if (!token0 || !token1) return
 
   let oldTick = pool.tick
 
@@ -407,8 +407,8 @@ export function handleSwap(event: SwapEvent): void {
   // update USD pricing
   bundle.ethPriceUSD = getEthPriceInUSD()
   bundle.save()
-  token0.derivedETH = findBnbPerToken(token0 as Token)
-  token1.derivedETH = findBnbPerToken(token1 as Token)
+  token0.derivedETH = findPlqPerToken(token0 as Token)
+  token1.derivedETH = findPlqPerToken(token1 as Token)
 
   /**
    * Things afffected by new USD rates
@@ -515,7 +515,7 @@ export function handleSwap(event: SwapEvent): void {
     loadTickUpdateFeeVarsAndSave(newTick.toI32(), event)
   }
 
-  if (!oldTick) return 
+  if (!oldTick) return
 
   let numIters = oldTick
     .minus(newTick!)
@@ -544,7 +544,7 @@ export function handleSwap(event: SwapEvent): void {
 export function handleFlash(event: FlashEvent): void {
   // update fee growth
   let pool = Pool.load(event.address.toHexString())
-  if (!pool) return 
+  if (!pool) return
 
   let poolContract = PoolABI.bind(event.address)
   let feeGrowthGlobal0X128 = poolContract.feeGrowthGlobal0X128()
