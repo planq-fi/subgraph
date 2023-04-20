@@ -1,6 +1,6 @@
 specVersion: 0.0.2
-description: Uniswap is a decentralized protocol for automated token exchange on Ethereum.
-repository: https://github.com/Uniswap/uniswap-v3-subgraph
+description: PlanqFi is a decentralized protocol for automated token exchange on Planq.
+repository: https://github.com/planq-fi/subgraph
 schema:
   file: ./schema.graphql
 features:
@@ -8,11 +8,11 @@ features:
 dataSources:
   - kind: ethereum/contract
     name: Factory
-    network: bsc
+    network: planq
     source:
-      address: '0xdB1d10011AD0Ff90774D0C6Bb92e5C5c8b4461F7'
+      address: '0x43D238E8FEA3671b8468De6b11B6c1fA0ea4Be1c'
       abi: Factory
-      startBlock: 25605652
+      startBlock: 2410270
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
